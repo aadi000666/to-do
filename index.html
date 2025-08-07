@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>TO-DO-APP</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: rgb(10, 1, 10);
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: rgb(34, 202, 240);
+            padding: 1px 20px 20px 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label,
+        input,
+        button{
+            margin: 10px 0;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+        input{
+            width: 100%;
+            margin-top: 10px;
+        }
+        table{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px; 
+
+        }
+        th, td {
+            padding: 5px;
+            border: 1px solid #961c1c;
+            text-align: center;
+        }
+        th {
+            background-color: #030718;
+            color: rgb(220, 25, 158);
+        }
+        button{
+            background-color: rgb(7, 7, 12);
+            color: rgb(208, 172, 172);
+            padding: 15px;
+            border: none;
+
+        }
+        button:hover{
+            background-color: #04050a;
+            
+
+        }
+
+        
+            
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align:center">TO-DO-LIST</h2>
+
+        <label for="">Title :</label>
+        <input type="text" id="title" />
+        <label for="">Description :</label>
+        <input type="text" id="description" />
+        <label for="">Date :</label>
+        <input type="date" id="date" />
+        <label for="">Time :</label>
+        <input type="time" id="time" />
+        <button style="width: 100%" onclick="scheduleRemider();">
+            AAD TASK
+        </button>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>
+                        Title
+                   </th>
+                   <th>Description</th>
+                   <th>Date &  Time</th>
+                <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="remiderTableBody"></tbody>
+
+        </table>
+        </div>
+        <audio src="mixkit-urgent-simple-tone-loop-2976.wav"id="notificationSound"></audio>
+        <script>
+            if ("Notification" in window) {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        alert("Notification permission granted.");
+                        location.reload();
+                    }
+                });
+            }
+
+            var timeoutIds = [];
+
+            function scheduleRemider() {
+                var title = document.getElementById("title").value;
+                var description = document.getElementById("description").value;
+                var date = document.getElementById("date").value;
+                var time = document.getElementById("time").value;
+
+                var datetimeString = date + " " + time;
+                var scheduledTime = new Date(datetimeString);
+                var currentTime = new Date();
+                var timeDifference = scheduledTime - currentTime;
+
+                if (timeDifference > 0) {
+                    addReminder(title, description, datetimeString);
+
+                    var timeoutId = setTimeout(function () {
+                        document.getElementById("notificationSound").play();
+
+                        var notification = new Notification(title, {
+                            body: description,
+                            requireInteraction: true,
+                        });
+                    }, timeDifference);
+
+                    timeoutIds.push(timeoutId);
+                } 
+                else {
+                    alert("Please select a future time.");
+                }
+            }
+
+            function addReminder(title, description, datetimeString) {
+                var tableBody = document.getElementById("remiderTableBody");
+                var row = tableBody.insertRow();
+                var titleCell = row.insertCell(0);
+                var descriptionCell = row.insertCell(1);
+                var datetimeCell = row.insertCell(2);
+                var actionCell = row.insertCell(3);
+                titleCell.innerHTML = title;
+                descriptionCell.innerHTML = description;
+                datetimeCell.innerHTML = datetimeString;
+                actionCell.innerHTML = `<button onclick="deleteReminder(this)">Delete</button>`;
+            }
+            function deleteReminder(button) {
+                var row = button.closest("tr");
+                var index = row.rowIndex;
+
+                clearTimeout(timeoutIds[index - 1]);
+                timeoutIds.splice(index - 1, 1);
+
+                row.remove();
+            }
+        </script>
+</body>
+</html>
